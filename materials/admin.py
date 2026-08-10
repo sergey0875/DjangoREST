@@ -14,3 +14,4 @@ class ProductAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     list_display = ("id","name", "description", "preview", "video_url")
     search_fields = ("name", "description",)
+
