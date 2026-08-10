@@ -5,4 +5,3 @@ from .models import CustomUser
 class UsersAdmin(admin.ModelAdmin):
     list_display = ("id", "avatar", "number_phone","email", "city",)
     search_fields = ("number_phone", "city",)
-
