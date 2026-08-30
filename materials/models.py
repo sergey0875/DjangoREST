@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -11,6 +12,7 @@ class Course(models.Model):
         null=True,
         verbose_name="картинка",
     )
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -29,13 +31,14 @@ class Lesson(models.Model):
         null=True,
         verbose_name="картинка",
     )
-    video_url = models.URLField(max_length=500, verbose_name="Ссылка на видео")
+    video_url = models.URLField(max_length=500, verbose_name="Ссылка на видео", null=True, blank=True)
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
         related_name='lessons',
         verbose_name="Курс"
     )
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.name
