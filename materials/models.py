@@ -3,6 +3,7 @@ from django.db import models
 
 
 
+
 class Course(models.Model):
     name = models.CharField(max_length=100, verbose_name="название")
     description = models.TextField(null=True, blank=True, verbose_name="описание")
@@ -47,3 +48,7 @@ class Lesson(models.Model):
         verbose_name = "урок"
         verbose_name_plural = "уроки"
 
+
+class Subscriptions(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='subscriptions')
