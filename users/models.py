@@ -24,6 +24,9 @@ class Payments(models.Model):
     paid_lesson = models.ForeignKey(Lesson, on_delete=models.SET_NULL, blank=True, null=True)
     payment_amount = models.IntegerField(verbose_name="сумма оплаты")
     payment_method = models.IntegerField(verbose_name="способ оплаты")
+    session_id = models.CharField(max_length=255, blank=True, null=True, verbose_name="ID сессии Stripe")
+    link = models.URLField(max_length=500, blank=True, null=True, verbose_name="Ссылка на оплату")
+    product= models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.user.email
