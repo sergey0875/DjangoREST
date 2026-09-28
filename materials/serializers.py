@@ -15,8 +15,6 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 
-
-
 class CourseSerializer(serializers.ModelSerializer):
     world_lesson = LessonSerializer(source= 'lessons', many=True, read_only=True)
     course_count_lesson = SerializerMethodField()
