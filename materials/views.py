@@ -1,4 +1,3 @@
-from django.template.context_processors import request
 from rest_framework.response import Response
 
 from materials.models import Subscriptions
@@ -10,6 +9,7 @@ from rest_framework.views import APIView
 from materials.paginators import CustomPagination
 from materials.serializers import CourseSerializer, LessonSerializer
 from materials.models import Course, Lesson
+from materials.tasks import add
 from users.permissions import IsModerator, IsOwnerOrReadOnly
 
 
@@ -97,9 +97,13 @@ class SubscriptionAPIView(APIView):
                 message = 'подписка удалена'
 
 
+
             else:
                 Subscriptions.objects.create(user=user, course=course_item) # записываем в базу данных
                 message = 'подписка добавлена'
+
+                if user.email:
+                   add.delay(user.email)
 
             return Response({"message": message})
 

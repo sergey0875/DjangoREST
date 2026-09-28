@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "users", "materials", 'rest_framework', 'django_filters', 'rest_framework_simplejwt', 'drf_yasg',
+    "users", "materials", 'rest_framework',
+    'django_filters', 'rest_framework_simplejwt',
+    'drf_yasg', 'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -160,3 +162,31 @@ SIMPLE_JWT = {
 
 
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
+
+# Настройки для Celery
+CELERY_BEAT_SCHEDULE = {
+    'block_inactive_users': {
+        'task': 'materials.tasks.block_inactive_users',  # Путь к задаче
+        'schedule': timedelta(hours=4),  # Расписание выполнения задачи.
+    },
+}
+
+
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+
+
+
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'Serggg1205@yandex.ru'
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
