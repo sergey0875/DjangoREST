@@ -134,6 +134,8 @@ __pypackages__/
 # Celery stuff
 celerybeat-schedule
 celerybeat.pid
+celerybeat-schedule*
+Celery Beat
 
 
 # Redis

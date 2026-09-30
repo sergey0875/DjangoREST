@@ -1,3 +1,8 @@
+from datetime import timedelta
+from functools import partial
+
+from django.db import transaction
+from django.utils import timezone
 from rest_framework.response import Response
 
 from materials.models import Subscriptions
@@ -9,7 +14,7 @@ from rest_framework.views import APIView
 from materials.paginators import CustomPagination
 from materials.serializers import CourseSerializer, LessonSerializer
 from materials.models import Course, Lesson
-from materials.tasks import add
+from materials.tasks import email_notification
 from users.permissions import IsModerator, IsOwnerOrReadOnly
 
 
@@ -22,10 +27,28 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+
+
+    def perform_update(self, serializer):
+        course = self.get_object()
+        old_updated_at = course.updated_at
+        now = timezone.now()
+
+        instance = serializer.save()
+        instance.updated_at = now
+        instance.save()
+
+        if old_updated_at is None or (now - old_updated_at) >= timedelta(hours=4):
+
+            transaction.on_commit(
+                partial(email_notification.delay, instance.id)
+            )
+
+
     def get_permissions(self):
         if self.action == 'create':
             self.permission_classes = (~IsModerator,)
-        elif self.action in ['update', 'retrieve']:
+        elif self.action in ['update', 'partial_update', 'retrieve']:
             self.permission_classes = (IsModerator | IsOwnerOrReadOnly,)
         elif self.action == 'destroy':
             self.permission_classes = (~IsModerator | IsOwnerOrReadOnly,)
@@ -39,7 +62,6 @@ class LessonCreateAPIview(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-
 
 
 
@@ -97,13 +119,10 @@ class SubscriptionAPIView(APIView):
                 message = 'подписка удалена'
 
 
-
             else:
                 Subscriptions.objects.create(user=user, course=course_item) # записываем в базу данных
                 message = 'подписка добавлена'
 
-                if user.email:
-                   add.delay(user.email)
 
             return Response({"message": message})
 
