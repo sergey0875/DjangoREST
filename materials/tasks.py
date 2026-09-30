@@ -6,15 +6,26 @@ from django.utils import timezone
 from config.settings import EMAIL_HOST_USER
 from django.core.mail import send_mail
 
+from materials.models import Course, Subscriptions
 from users.models import CustomUser
 
 
 @shared_task
-def add(email):
+def email_notification(course_id):
 
-    """ Отправка сообщения на email"""
+    """Отправка сообщения об обновлении курса подписчикам"""
 
-    send_mail('Новелла подписка', 'Изменения в новой подписке', EMAIL_HOST_USER, [email])
+    course = Course.objects.get(pk=course_id)
+
+    recipient_list = list(
+        Subscriptions.objects.filter(course=course).values_list('user__email', flat=True)
+    )
+
+    # Если подписчиков нет, завершаем задачу без отправки писем
+    if not recipient_list:
+        return f"У курса '{course.name}' нет подписчиков."
+
+    send_mail(f"Обновление курса: {course.name}", f"Курс '{course.name}' изменился, добавлены новые материалы.", EMAIL_HOST_USER, recipient_list)
 
 
 @shared_task
